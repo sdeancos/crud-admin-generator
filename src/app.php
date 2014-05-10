@@ -28,15 +28,28 @@ $app->register(new Silex\Provider\DoctrineServiceProvider(), array(
 
         'dbs.options' => array(
             'db' => array(
-                'driver'   => 'pdo_mysql',
-                'dbname'   => 'DATABASE_NAME',
-                'host'     => '127.0.0.1',
-                'user'     => 'DATABASE_USER',
+                'driver' => 'pdo_mysql',
+                'dbname' => 'DATABASE_NAME',
+                'host' => '127.0.0.1',
+                'user' => 'DATABASE_USER',
                 'password' => 'DATABASE_PASS',
-                'charset'  => 'utf8',
+                'charset' => 'utf8',
             ),
         )
 ));
+
+$app->register(new FranMoreno\Silex\Provider\PagerfantaServiceProvider());
+$app['pagerfanta.view.options'] = array(
+    'routeName'        => null,
+    'routeParams'      => array(),
+    'pageParameter'    => '[page]',
+    'proximity'        => 3,
+    'next_message'     => '&raquo;',
+    'previous_message' => '&laquo;',
+    'default_view'     => 'twitter_bootstrap3'
+);
+
+
 
 $app['asset_path'] = '/resources';
 $app['debug'] = true;

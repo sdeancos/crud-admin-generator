@@ -9,10 +9,6 @@
 
     <!-- page script -->
     <script type="text/javascript">
-        $(function() {
-            $("#__TABLENAME___list").dataTable();
-        });
-
         function confirm_delete(){
             if(!confirm("Are you sure? This action cannot be undone.")) { 
                 return false;
@@ -81,11 +77,11 @@
                                         </tr>
                                     </tfoot>
                                 </table>
+                                {{ pagerfanta(my_pager) }}
                             </div><!-- /.box-body -->
                         </div><!-- /.box -->
                     </div>
                 </div>
-
             </section><!-- /.content -->
         </aside><!-- /.right-side -->
     </div><!-- ./wrapper -->

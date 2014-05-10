@@ -14,9 +14,13 @@
 require_once __DIR__.'/../../../vendor/autoload.php';
 require_once __DIR__.'/../../../src/app.php';
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
+use Pagerfanta\Pagerfanta;
+use Pagerfanta\Adapter\DoctrineDbalAdapter;
+use Doctrine\DBAL\Query\QueryBuilder;
 
-$app->match('/__TABLENAME__', function () use ($app) {
+$app->match('/__TABLENAME__', function(Request $request) use ($app) {
     
 	$table_columns = array(
 __TABLECOLUMNS_ARRAY__
@@ -25,10 +29,20 @@ __TABLECOLUMNS_ARRAY__
     $primary_key = "__TABLE_PRIMARYKEY__";
 	$rows = array();
 
-    $find_sql = "SELECT * FROM `__TABLENAME__`";
-    $rows_sql = $app['db']->fetchAll($find_sql, array());
+	$queryBuilder = new QueryBuilder($app['db']);
+	$queryBuilder->select('x.*')->from('__TABLENAME__', 'x');
+	
+	$countQueryBuilderModifier = function ($queryBuilder) {
+	    $queryBuilder->select('COUNT(DISTINCT x.id) AS total_results')
+		  ->setMaxResults(1);
+	};
+	
+	$adapter = new DoctrineDbalAdapter($queryBuilder, $countQueryBuilderModifier);
+	$pagerfanta = new Pagerfanta($adapter);
+	$pagerfanta->setMaxPerPage(10);
+	$pagerfanta->setCurrentPage($request->query->get('page', 1));
 
-    foreach($rows_sql as $row_key => $row_sql){
+    foreach($pagerfanta as $row_key => $row_sql){
     	for($i = 0; $i < count($table_columns); $i++){
 
 __EXTERNALS_FOR_LIST__
@@ -39,7 +53,8 @@ __EXTERNALS_FOR_LIST__
     return $app['twig']->render('__TABLENAME__/list.html.twig', array(
     	"table_columns" => $table_columns,
         "primary_key" => $primary_key,
-    	"rows" => $rows
+    	"rows" => $rows,
+	'my_pager' => $pagerfanta
     ));
         
 })
